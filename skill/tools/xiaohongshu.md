@@ -31,6 +31,16 @@ xhs feed                        # recommendation feed
 ```
 Short index: after a `search`, `xhs read 1` / `xhs comments 1` reuse result #1.
 
+## Read the images — content is often IN the pictures, not the caption
+XHS is image-first: price boards (价格表), specs, and key details are frequently
+only in a note's photos. After `xhs read`, fetch and view the images yourself:
+```
+xhs read <id|index> --json        # → .data.items[0].note_card.image_list[].url_default
+curl -s -o /tmp/xhs.webp "<url_default>"          # xhscdn URLs need no auth/Referer
+sips -s format png /tmp/xhs.webp --out /tmp/xhs.png   # WebP → PNG, then view it
+```
+`xhs` itself can't download/OCR images — it only returns the URLs.
+
 ## Disabled — never run these
 This tool is **read-only**. It must NOT publish, delete, or alter content:
 `xhs comment`, `xhs reply`, `xhs post`, `xhs delete`, `xhs delete-comment`.
@@ -45,6 +55,6 @@ xhs follow <user_id>
 - **Do NOT parallelize** `xhs` calls — it has a built-in rate-limit delay for account safety.
 - Captcha / IP-block: ask the user to resolve it in the browser, then retry.
 - Full command list: `xhs --help` (the package ships its own detailed skill doc).
-- Limits: no image/video download, no DMs, single account at a time.
+- Limits: no DMs, single account; the CLI won't download media (but image URLs are fetchable — see above).
 - Install (auto-done by `scripts/install.sh`): `uv tool install xiaohongshu-cli`;
   upgrade with `uv tool upgrade xiaohongshu-cli` to avoid upstream API drift.
