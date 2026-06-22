@@ -2,11 +2,20 @@
 
 OpenCLI (`@jackwener/opencli`) drives your **real logged-in Chrome** via a browser
 extension + local daemon, so it reuses sessions you're already signed into — no
-per-site cookie/login dance. It's the cross-channel fallback for `reddit` and
-`twitter` (and later `zhihu`). **Desktop only; Chrome must stay open.**
+per-site cookie/login dance. **Desktop only; Chrome must stay open.**
 
-Use it only when a channel's primary CLI is unavailable or blocked. The channel
-docs call it as `opencli <site> <cmd>` (e.g. `opencli reddit search …`).
+Two roles:
+1. **Fallback** for `reddit` / `twitter` when their primary CLI is unavailable or blocked.
+2. **Escape hatch** for any of its **155 site adapters** that has no dedicated tool —
+   zhihu, weibo, bilibili, douban, v2ex, arxiv, github, taobao, xueqiu, hackernews,
+   pubmed, wikipedia, and more. List them with `opencli` (no args) or `opencli list`.
+
+Call it as `opencli <site> <cmd>` (e.g. `opencli zhihu search …`). Discover a site's
+commands first — don't guess flags:
+```
+opencli <site> --help -f yaml      # all commands + args/options, structured
+```
+**Stay read-only**: search/read/list only — no posting, commenting, or liking.
 
 ## One-time setup (partly manual — can't be fully scripted)
 

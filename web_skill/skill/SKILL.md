@@ -24,6 +24,9 @@ On-device tools. Read the relevant tool doc before running any commands.
 | Xiaohongshu (小红书) search / read / comments (read-only) | [tools/xiaohongshu.md](tools/xiaohongshu.md) |
 | Reddit posts / comments / subreddit / search (read-only) | [tools/reddit.md](tools/reddit.md) |
 | Twitter / X tweets / timelines / search (read-only) | [tools/twitter.md](tools/twitter.md) |
+| **Any other site** with no row above (zhihu, weibo, bilibili, douban, v2ex, arxiv, github, taobao…) | run `opencli <site>` directly — [tools/opencli.md](tools/opencli.md) |
 
 Backends install via `web-skill install`; check status with `web-skill doctor`.
-OpenCLI is a shared opt-in fallback ([tools/opencli.md](tools/opencli.md)).
+OpenCLI drives **155 sites** out of the box and is the escape hatch for anything
+without a dedicated tool above (also the shared opt-in fallback for reddit/twitter).
+Discover commands with `opencli <site> --help -f yaml`. Stay read-only.
