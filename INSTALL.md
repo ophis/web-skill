@@ -17,13 +17,13 @@ the skill is registered at `~/.claude/skills/web-skill/` and ready to use.
 ### Step 1: Clone the repo
 
 ```bash
-git clone https://github.com/francisw/web-skill.git ~/.claude/skills/web-skill
+git clone git@github.com:ophis/web-skill.git ~/.claude/skills/web-skill
 ```
 
 If already cloned, pull latest:
 
 ```bash
-git -C ~/.claude/skills/web-skill pull
+git -C ~/.claude/skills/web-skill pull --ff-only
 ```
 
 ### Step 2: Install system dependencies
