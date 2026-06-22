@@ -11,25 +11,28 @@ available in Claude Code. After installation, the skill is registered at
 ### ⚠️ Boundaries
 
 - **DO NOT** use `sudo` unless the user explicitly approves
-- **DO NOT** modify files outside `~/.claude/skills/web-skill/`
+- **DO NOT** modify files outside `~/.web-skill/` (source clone) and `~/.claude/skills/web-skill/` (installed copy)
 - **DO NOT** create files in the current working directory / user's project
 
 ### Step 1: Clone the repo
 
+Clone to a **source** location — NOT into the skills dir. `install.sh` copies
+`skill/` from here into `~/.claude/skills/web-skill/`.
+
 ```bash
-git clone https://github.com/ophis/web-skill.git ~/.claude/skills/web-skill
+git clone https://github.com/ophis/web-skill.git ~/.web-skill
 ```
 
 If already cloned, pull latest:
 
 ```bash
-git -C ~/.claude/skills/web-skill pull --ff-only
+git -C ~/.web-skill pull --ff-only
 ```
 
 ### Step 2: Install system dependencies
 
 ```bash
-bash ~/.claude/skills/web-skill/script/install.sh
+bash ~/.web-skill/scripts/install.sh
 ```
 
 This installs: `uv`, `ffmpeg`.

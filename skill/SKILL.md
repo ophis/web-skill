@@ -17,8 +17,4 @@ Zero-auth, on-device tools for video. Read the relevant tool doc before running 
 |------|-----------|
 | Video transcript / STT (YouTube, Bilibili, audio) | [tools/video-transcript/video-transcript.md](tools/video-transcript/video-transcript.md) |
 
-## Install dependencies
-
-```bash
-bash ${CLAUDE_SKILL_DIR}/script/install.sh
-```
+Requires `uv` and `ffmpeg` (one-time install via the repo's `scripts/install.sh`).

@@ -1,13 +1,15 @@
 # web-skill
 
-Zero-auth, on-device tools for Claude Code — video transcripts, local LLM inference, and TTS. No API keys required.
+Zero-auth, on-device tools for Claude Code — video transcripts. No API keys required.
 
 ## Install
 
 ```bash
-git clone git@github.com:ophis/web-skill.git ~/playground/web-skill
-bash ~/playground/web-skill/script/install.sh
+git clone https://github.com/ophis/web-skill.git ~/.web-skill
+bash ~/.web-skill/scripts/install.sh
 ```
+
+The clone is the source; `install.sh` copies `skill/` into `~/.claude/skills/web-skill/`. Don't clone into the skills dir directly.
 
 See [INSTALL.md](INSTALL.md) for full instructions (including the one-liner for AI agents).
 
@@ -29,7 +31,7 @@ skill/          ← installed to ~/.claude/skills/web-skill/
   SKILL.md      ← router (auto-loaded by Claude Code)
   references/
     video-transcript/
-script/
+scripts/
   install.sh    ← installs system deps + registers skill
 INSTALL.md      ← instructions for AI agents
 ```

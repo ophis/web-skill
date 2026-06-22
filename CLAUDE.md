@@ -2,7 +2,7 @@
 
 ## Sync rule
 
-`script/install.sh` and `INSTALL.md` must be kept in sync with the actual skill structure at all times:
+`scripts/install.sh` and `INSTALL.md` must be kept in sync with the actual skill structure at all times:
 
 - Adding a new reference under `skill/references/`? Update the install.sh system-deps section if the reference needs new CLI tools, and update INSTALL.md's model-download list if it downloads new models on first use.
 - Removing a dependency? Remove it from install.sh and INSTALL.md.

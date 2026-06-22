@@ -26,6 +26,10 @@ echo -e "\n${BOLD}Installing web-skill${RESET}\n"
 # ── Register skill ────────────────────────────────────────────────────────────
 
 echo -e "${BOLD}Skill registration${RESET}"
+if [[ "$REPO_DIR" == "$SKILL_DST" ]]; then
+  fail "Clone is inside the skills dir ($SKILL_DST) — installer would delete its own source."
+  fail "Clone elsewhere (e.g. ~/.web-skill) and re-run."; exit 1
+fi
 rm -rf "$SKILL_DST"
 cp -r "$REPO_DIR/skill" "$SKILL_DST"
 ok "Copied to $SKILL_DST"
