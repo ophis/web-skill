@@ -50,6 +50,7 @@ def install(with_opencli=False):
     _brew("ffmpeg")                      # video-transcript
     _uv_tool("xiaohongshu-cli", "xhs")   # xiaohongshu
     _uv_tool("rdt-cli", "rdt")           # reddit (primary)
+    _uv_tool("twitter-cli", "twitter")   # twitter (primary)
     if with_opencli:                     # shared fallback for reddit/xiaohongshu/…
         _install_opencli()
     print("\nDone. Next: web-skill skill --install   (then: web-skill doctor)")

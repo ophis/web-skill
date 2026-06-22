@@ -7,6 +7,7 @@ browser cookies; OpenCLI reuses the browser directly. Mainland China needs a pro
 """
 from urllib.parse import urlparse
 
+from .. import opencli
 from ..probe import probe_command
 from .base import Channel
 
@@ -54,16 +55,4 @@ class RedditChannel(Channel):
         return "warn", "rdt installed but not logged in → rdt login"
 
     def _check_opencli(self):
-        """OpenCLI candidate (shared fallback). None = not installed.
-
-        `opencli daemon status` is a pure query (unlike `opencli doctor`, which
-        auto-starts the daemon). "Extension: connected" = the browser bridge is live.
-        """
-        probe = probe_command("opencli", ["daemon", "status"], timeout=10, package="@jackwener/opencli")
-        if probe.status == "missing":
-            return None
-        if probe.status in ("broken", "timeout"):
-            return "error", "opencli installed but not responding\n" + probe.hint
-        if "Extension: connected" in probe.output:
-            return "ok", "opencli ready (browser bridge): reddit search/read/subreddit/hot"
-        return "warn", "opencli installed — open Chrome + install/enable its extension (see opencli.md)"
+        return opencli.check("opencli ready (browser bridge): reddit search/read/subreddit/hot")

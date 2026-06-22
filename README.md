@@ -23,6 +23,7 @@ See [INSTALL.md](INSTALL.md) for the AI-agent install flow.
 | video-transcript | Transcribe YouTube / Bilibili / any video URL or local audio file (keyless) |
 | xiaohongshu | Search / read / browse 小红书 notes + comments via `xhs` (read-only; one-time browser login) |
 | reddit | Search / read posts, comments, subreddits, users via `rdt` (read-only; browser login; proxy in CN). OpenCLI fallback. |
+| twitter | Search / read tweets, timelines, threads, profiles via `twitter` (read-only; browser login). OpenCLI fallback. |
 
 OpenCLI (`@jackwener/opencli`) is a shared opt-in fallback backend reused across
 social channels — install with `web-skill install --with-opencli`.

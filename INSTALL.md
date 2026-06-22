@@ -30,7 +30,7 @@ web-skill install
 ```
 
 Installs (idempotent): Homebrew formulae (`ffmpeg`), `uv`, and per-channel CLIs
-(`xiaohongshu-cli`, `rdt-cli`). macOS / Apple Silicon only (MLX needs Metal).
+(`xiaohongshu-cli`, `rdt-cli`, `twitter-cli`). macOS / Apple Silicon only (MLX needs Metal).
 Add `--with-opencli` to also install the shared OpenCLI fallback (npm + a manual
 Chrome-extension step; desktop only).
 
@@ -52,5 +52,6 @@ web-skill doctor               # per-channel install/auth status
 
 Tell the user what's green and what needs manual action — e.g. Xiaohongshu shows
 `not logged in` until they run `xhs login --cookie-source chrome`, Reddit until
-`rdt login` (and needs a proxy in mainland China), and STT models download on
+`rdt login` (and needs a proxy in mainland China), Twitter until they're logged
+into x.com in a browser (it auto-extracts cookies), and STT models download on
 first transcription.
