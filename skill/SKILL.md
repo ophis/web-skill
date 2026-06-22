@@ -11,13 +11,13 @@ description: >
 # web-skill
 
 Zero-auth, on-device tools for video, LLM, and audio. Read the relevant
-reference before running any commands.
+tool doc before running any commands.
 
 ## Routing table
 
 | Task | Reference |
 |------|-----------|
-| Video transcript / STT (YouTube, Bilibili, audio) | [references/video-transcript/SKILL.md](references/video-transcript/SKILL.md) |
+| Video transcript / STT (YouTube, Bilibili, audio) | [tools/video-transcript/video-transcript.md](tools/video-transcript/video-transcript.md) |
 
 ## Install dependencies
 
