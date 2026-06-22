@@ -1,8 +1,16 @@
-"""Channel registry. Add a channel = import it and add to CHANNELS."""
-from .video_transcript import VideoTranscript
-from .xiaohongshu import Xiaohongshu
+# -*- coding: utf-8 -*-
+"""Channel registry — add a channel = import it and append to ALL_CHANNELS."""
+from typing import List
 
-CHANNELS = [
-    VideoTranscript(),
-    Xiaohongshu(),
+from .base import Channel
+from .video_transcript import VideoTranscriptChannel
+from .xiaohongshu import XiaoHongShuChannel
+
+ALL_CHANNELS: List[Channel] = [
+    VideoTranscriptChannel(),
+    XiaoHongShuChannel(),
 ]
+
+
+def get_all_channels() -> List[Channel]:
+    return ALL_CHANNELS

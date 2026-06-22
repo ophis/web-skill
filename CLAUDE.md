@@ -2,16 +2,15 @@
 
 ## Structure
 
-Doc = router, package = engine. The agent reads `web_skill/skill/` docs and runs
-the upstream CLIs; `web_skill/` (cli/probe/channels) installs deps, reports
-status (`doctor`), and registers the skill. Layout in README.md.
+Doc = router, package = engine — framework ported from Agent-Reach (don't reinvent it). The agent reads `web_skill/skill/` docs and runs the upstream CLIs; `web_skill/` is the engine: `probe.py` (`probe_command`), `channels/` (`Channel.check()` + ordered `backends` + `active_backend`), `doctor.py` (`check_all`/`format_report`), `cli.py` (install/doctor/skill). The deterministic "which backend is usable" decision lives in `check()`, not in the agent. Layout in README.md.
 
 ## Adding a channel — keep these in sync
 
 A new tool means **all** of:
-- `web_skill/channels/<name>.py` (`Channel`: `brew_deps`, `uv_tools`, `status()`) + register in `channels/__init__.py`. This is what `web-skill install`/`doctor` read — no separate deps list to maintain.
+- `web_skill/channels/<name>.py` — `Channel` subclass: `name`, `description`, `backends` (ordered, `backends[0]` preferred), `tier`, `can_handle()`, `check()` (probe each candidate via `probe_command`, set `active_backend`, return first ok→warn). Register in `channels/__init__.py`. Multi-backend (e.g. primary CLI + OpenCLI fallback) = list both + an `_check_<backend>` each; copy the pattern in `xiaohongshu.py`.
+- Install line(s) in `install()` in `web_skill/cli.py`.
 - `web_skill/skill/tools/<name>.md` (router doc) + a row in `web_skill/skill/SKILL.md`.
-- `INSTALL.md` only if a new first-run model download or manual step is introduced (the dep install itself is now declarative via the channel).
+- `INSTALL.md` only if a new first-run model download or manual step is introduced.
 - Reusable scripts go in `web_skill/skill/scripts/`; reference them in docs as `${CLAUDE_SKILL_DIR}/scripts/<x>.py`. `tools/` stays pure docs.
 
 ## Skill frontmatter rule

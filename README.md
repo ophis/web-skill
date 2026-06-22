@@ -26,11 +26,13 @@ See [INSTALL.md](INSTALL.md) for the AI-agent install flow.
 ## Architecture (doc = router, package = engine)
 
 ```
-web_skill/                    ← Python package (the engine)
+web_skill/                    ← Python package (the engine; framework ported from Agent-Reach)
   cli.py                      ← web-skill install | doctor | skill --install
-  probe.py                    ← tiny CLI prober
-  channels/                   ← one file per tool: deps + status()
-    base.py  video_transcript.py  xiaohongshu.py
+  probe.py                    ← probe_command() — installed vs broken vs not-logged-in
+  doctor.py                   ← check_all() / format_report()
+  channels/                   ← one Channel per platform
+    base.py                   ← Channel ABC: backends (ordered), check(), active_backend
+    video_transcript.py  xiaohongshu.py
   skill/                      ← bundled, copied to ~/.claude/skills/web-skill/
     SKILL.md                  ← router (auto-loaded by Claude Code)
     tools/                    ← pure router docs, one .md per tool
@@ -41,11 +43,17 @@ pyproject.toml                ← packaging + `web-skill` entry point
 tests/                        ← one test_<script>.py per script
 ```
 
+A `Channel` lists its `backends` in priority order; `check()` probes them with
+`probe_command()` and sets `active_backend` to the first usable one (the
+deterministic backend selection lives in code, not in the agent). The agent
+reads the skill docs and runs the active backend's native CLI directly.
+
 ## Adding a channel
 
-1. `web_skill/channels/<name>.py` — a `Channel` subclass (name, doc, `brew_deps`, `uv_tools`, `status()`); register it in `channels/__init__.py`.
-2. `web_skill/skill/tools/<name>.md` — the router doc; add a row to `skill/SKILL.md`.
-3. Reusable scripts (if any) go in `web_skill/skill/scripts/`; add `tests/test_<script>.py`.
+1. `web_skill/channels/<name>.py` — a `Channel` subclass: `name`, `description`, `backends` (ordered), `tier`, `can_handle()`, `check()` (probe each backend, set `active_backend`); register it in `channels/__init__.py`.
+2. Add its install line(s) to `install()` in `web_skill/cli.py`.
+3. `web_skill/skill/tools/<name>.md` — the router doc; add a row to `skill/SKILL.md`.
+4. Reusable scripts (if any) go in `web_skill/skill/scripts/`; add `tests/test_<script>.py`.
 
 ## Requirements
 

@@ -1,15 +1,28 @@
-from ..probe import have
+# -*- coding: utf-8 -*-
+"""Video transcript — local uv-run scripts (yt-dlp captions / mlx STT). No login."""
+import shutil
+from urllib.parse import urlparse
+
 from .base import Channel
 
+_VIDEO_HOSTS = ("youtube.com", "youtu.be", "bilibili.com", "b23.tv",
+                "vimeo.com", "twitch.tv", "tiktok.com")
 
-class VideoTranscript(Channel):
+
+class VideoTranscriptChannel(Channel):
     name = "video-transcript"
-    doc = "video-transcript.md"
-    brew_deps = ["ffmpeg"]
-    uv_tools = []  # yt-dlp / mlx-* auto-install on first `uv run` via PEP 723
+    description = "Video transcript / STT"
+    backends = ["uv-scripts"]
+    tier = 0
 
-    def status(self):
-        missing = [c for c in ("uv", "ffmpeg") if not have(c)]
+    def can_handle(self, url: str) -> bool:
+        d = urlparse(url).netloc.lower()
+        return any(h in d for h in _VIDEO_HOSTS)
+
+    def check(self, config=None):
+        self.active_backend = None
+        missing = [c for c in ("uv", "ffmpeg") if not shutil.which(c)]
         if missing:
-            return "error", f"missing {', '.join(missing)} — run: web-skill install"
-        return "ok", "uv + ffmpeg ready (STT models download on first use)"
+            return "error", f"missing {', '.join(missing)} → web-skill install"
+        self.active_backend = "uv-scripts"
+        return "ok", "uv-run scripts ready (STT models download on first use)"
