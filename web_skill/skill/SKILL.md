@@ -7,7 +7,7 @@ description: >
   小红书/xiaohongshu/xhs/redbook/reddit/subreddit/redd.it.
   On-device; video tools are keyless. Xiaohongshu & Reddit need a one-time browser
   login (read-only); Reddit also needs a proxy in mainland China.
-allowed-tools: Bash(uv run:*), Bash(uvx:*), Bash(uv tool:*), Bash(xhs status:*), Bash(xhs whoami:*), Bash(xhs login:*), Bash(xhs search:*), Bash(xhs read:*), Bash(xhs comments:*), Bash(xhs sub-comments:*), Bash(xhs user:*), Bash(xhs user-posts:*), Bash(xhs feed:*), Bash(xhs hot:*), Bash(xhs topics:*), Bash(xhs my-notes:*), Bash(xhs notifications:*), Bash(xhs unread:*), Bash(xhs favorites:*), Bash(rdt status:*), Bash(rdt whoami:*), Bash(rdt login:*), Bash(rdt search:*), Bash(rdt read:*), Bash(rdt show:*), Bash(rdt feed:*), Bash(rdt popular:*), Bash(rdt all:*), Bash(rdt sub-info:*), Bash(rdt user:*), Bash(rdt saved:*), Bash(rdt upvoted:*), Bash(rdt export:*), Bash(opencli reddit search:*), Bash(opencli reddit read:*), Bash(opencli reddit subreddit:*), Bash(opencli reddit hot:*), Bash(opencli daemon status:*)
+allowed-tools: Bash
 ---
 
 # web-skill

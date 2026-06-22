@@ -54,10 +54,16 @@ class RedditChannel(Channel):
         return "warn", "rdt installed but not logged in → rdt login"
 
     def _check_opencli(self):
-        """OpenCLI candidate (shared fallback). None = not installed."""
-        probe = probe_command("opencli", ["--version"], timeout=10, package="@jackwener/opencli")
+        """OpenCLI candidate (shared fallback). None = not installed.
+
+        `opencli daemon status` is a pure query (unlike `opencli doctor`, which
+        auto-starts the daemon). "Extension: connected" = the browser bridge is live.
+        """
+        probe = probe_command("opencli", ["daemon", "status"], timeout=10, package="@jackwener/opencli")
         if probe.status == "missing":
             return None
-        if not probe.ok:
-            return "error", "opencli exists but won't execute\n" + probe.hint
-        return "warn", "opencli installed — needs Chrome extension + reddit.com login (see opencli.md)"
+        if probe.status in ("broken", "timeout"):
+            return "error", "opencli installed but not responding\n" + probe.hint
+        if "Extension: connected" in probe.output:
+            return "ok", "opencli ready (browser bridge): reddit search/read/subreddit/hot"
+        return "warn", "opencli installed — open Chrome + install/enable its extension (see opencli.md)"
