@@ -2,10 +2,11 @@
 # requires-python = ">=3.9"
 # dependencies = ["requests"]
 # ///
-"""Unit tests for the pure logic in tools/video-transcript/scripts/.
+"""Unit tests for the video-transcript tool (tools/video-transcript/scripts/).
 
-Run:  uv run tests/test_scripts.py        (plain asserts, no framework)
-  or: uv run --with pytest pytest tests/  (same test_* functions)
+One test file per tool — run only what you touched:
+  uv run tests/test_video_transcript.py        (plain asserts, no framework)
+  uv run --with pytest pytest tests/           (whole suite, same test_* fns)
 
 Network/model paths (caption fetch, yt-dlp, STT models, Bilibili API) are NOT
 covered — they need live services. stt.py has no importable pure functions
