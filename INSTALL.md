@@ -17,7 +17,7 @@ the skill is registered at `~/.claude/skills/web-skill/` and ready to use.
 ### Step 1: Clone the repo
 
 ```bash
-git clone git@github.com:ophis/web-skill.git ~/.claude/skills/web-skill
+git clone https://github.com/ophis/web-skill.git ~/.claude/skills/web-skill
 ```
 
 If already cloned, pull latest:
