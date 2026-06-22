@@ -13,6 +13,10 @@ A new tool means **all** of:
 - `INSTALL.md` only if a new first-run model download or manual step is introduced.
 - Reusable scripts go in `web_skill/skill/scripts/`; reference them in docs as `${CLAUDE_SKILL_DIR}/scripts/<x>.py`. `tools/` stays pure docs.
 
+## Dev gotcha — rebuild before re-registering
+
+`web-skill skill --install` (the globally installed binary) copies the skill bundled in the **last `uv tool install`ed wheel**, NOT the working tree. After editing anything under `web_skill/skill/`, run `uv tool install . --force` first, then `web-skill skill --install` — otherwise stale skill files land in `~/.claude/skills`. (Or use `uv run web-skill skill --install`, which rebuilds from source each time.)
+
 ## Skill frontmatter rule
 
 `web_skill/skill/SKILL.md` frontmatter (`description`, `allowed-tools`) must accurately reflect what tools are actually available. Update it whenever a tool is added, removed, or its trigger phrases change. Never leave it describing tools that don't exist yet.
