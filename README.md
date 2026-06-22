@@ -18,7 +18,7 @@ See [INSTALL.md](INSTALL.md) for full instructions (including the one-liner for 
 | Skill | What it does |
 |-------|-------------|
 | video-transcript | Transcribe YouTube / Bilibili / any video URL or local audio file |
-| xiaohongshu | Search / read / comment / post Xiaohongshu (小红书) notes via `xhs` |
+| xiaohongshu | Search / read / browse Xiaohongshu (小红书) notes + comments via `xhs` (read-only) |
 
 ## Requirements
 

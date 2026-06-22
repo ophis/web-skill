@@ -31,11 +31,14 @@ xhs feed                        # recommendation feed
 ```
 Short index: after a `search`, `xhs read 1` / `xhs comments 1` reuse result #1.
 
-## Write — confirm with the user before running
+## Disabled — never run these
+This tool is **read-only**. It must NOT publish, delete, or alter content:
+`xhs comment`, `xhs reply`, `xhs post`, `xhs delete`, `xhs delete-comment`.
+
+## Engagement — not auto-permitted; ask the user first
 ```
 xhs like|favorite <id>          # --undo / unfavorite to reverse
-xhs comment <id> -c "text"
-xhs post --title "..." --body "..." [--images a.png]
+xhs follow <user_id>
 ```
 
 ## Notes
