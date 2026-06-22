@@ -12,7 +12,7 @@ allowed-tools: Bash(uv run:*), Bash(uvx:*)
 
 ## 1. Transcript (auto-routes by site)
 ```
-uv run ${CLAUDE_SKILL_DIR}/scripts/transcript.py "<url>" [lang] > /tmp/vt_<id>.txt
+uv run ${CLAUDE_SKILL_DIR}/tools/video-transcript/scripts/transcript.py "<url>" [lang] > /tmp/vt_<id>.txt
 ```
 Redirect to a file. `grep` or `Read` it only when you need the transcript's full or partial content.
 - **YouTube** → `youtube-transcript-api` (fast, keyless), then falls back to yt-dlp captions
@@ -29,12 +29,12 @@ Download the audio, then transcribe **locally on the GPU**:
 ```
 uvx yt-dlp -f bestaudio -o '/tmp/vt_%(id)s.%(ext)s' --no-simulate --print after_move:filepath "<url>"
 # names the audio by video id and prints its exact path, e.g. /tmp/vt_<id>.webm — pass that path to stt.py
-uv run ${CLAUDE_SKILL_DIR}/scripts/stt.py /tmp/vt_<id>.<ext> [lang] > /tmp/vt_<id>.txt
+uv run ${CLAUDE_SKILL_DIR}/tools/video-transcript/scripts/stt.py /tmp/vt_<id>.<ext> [lang] > /tmp/vt_<id>.txt
 ```
 **Bilibili** (yt-dlp 412s — use the official-API helper instead, always outputs .m4a):
 ```
-uv run ${CLAUDE_SKILL_DIR}/scripts/bilibili.py audio "<url>"     # -> /tmp/vt_<BVID>.m4a (prints the path)
-uv run ${CLAUDE_SKILL_DIR}/scripts/stt.py /tmp/vt_<BVID>.m4a [lang] > /tmp/vt_<BVID>.txt
+uv run ${CLAUDE_SKILL_DIR}/tools/video-transcript/scripts/bilibili.py audio "<url>"     # -> /tmp/vt_<BVID>.m4a (prints the path)
+uv run ${CLAUDE_SKILL_DIR}/tools/video-transcript/scripts/stt.py /tmp/vt_<BVID>.m4a [lang] > /tmp/vt_<BVID>.txt
 ```
 `bilibili.py meta "<url>"` prints title/duration/description (yt-dlp's `--print` also 412s).
 - `mlx-whisper` (Apple **MLX / Metal GPU**), `large-v3-turbo` model — **Apple Silicon only**; needs `ffmpeg` (`brew install ffmpeg`). First run downloads ~1.6GB to `~/.cache/huggingface`. Fully on-device, keyless.
