@@ -6,6 +6,7 @@ description: >
   playback. Triggers: 视频/transcript/字幕/总结视频/本地模型/念出来/read aloud/TTS/
   STT/speech-to-text/语音转文字.
   All tools are zero-auth and fully on-device — no API keys required.
+allowed-tools: Bash(uv run:*), Bash(uvx:*)
 ---
 
 # web-skill

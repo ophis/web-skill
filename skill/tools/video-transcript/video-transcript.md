@@ -1,13 +1,3 @@
----
-name: video-transcript
-description: >-
-  Fetch a video's transcript/captions from a URL — YouTube and 1800+ other sites
-  (Bilibili, Vimeo, Twitch, TikTok, …) — for summarizing, quoting, or analyzing a
-  video. Keyless, local, runs via uv. Use whenever a task involves a video link and
-  you need what was said.
-allowed-tools: Bash(uv run:*), Bash(uvx:*)
----
-
 # Video transcript
 
 ## 1. Transcript (auto-routes by site)
