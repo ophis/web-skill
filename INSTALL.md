@@ -35,20 +35,23 @@ git -C ~/.web-skill pull --ff-only
 bash ~/.web-skill/scripts/install.sh
 ```
 
-This installs: `uv`, `ffmpeg`.
+This installs: `uv`, `ffmpeg`, and the `xhs` CLI (`xiaohongshu-cli`).
 
 First-run model downloads happen automatically when each tool is first used:
 - Whisper large-v3-turbo ~1.6 GB (English STT)
 - Qwen3-ASR 1.7B 4bit ~0.9 GB (Chinese STT)
 
+Xiaohongshu needs a one-time browser login before use: `xhs login` (auto-extract
+browser cookies) or `xhs login --qrcode` — the user must do this themselves.
+
 ### Step 3: Verify
 
 ```bash
-uv --version && ffmpeg -version | head -1
+uv --version && ffmpeg -version | head -1 && command -v xhs
 ls ~/.claude/skills/web-skill/SKILL.md
 ```
 
 ### Step 4: Report to user
 
 Tell the user which steps succeeded and which (if any) need manual action
-(e.g. first-run model downloads on first use).
+(e.g. first-run model downloads, or `xhs login` for Xiaohongshu).

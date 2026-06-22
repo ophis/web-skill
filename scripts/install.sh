@@ -65,6 +65,19 @@ install_brew() {
 install_brew uv uv
 install_brew ffmpeg ffmpeg
 
+# ── uv tool CLIs (persistent, on PATH) ───────────────────────────────────────
+
+echo ""
+echo -e "${BOLD}Tool CLIs${RESET}"
+if command -v xhs &>/dev/null; then
+  ok "xhs (xiaohongshu-cli)"
+else
+  warn "installing xiaohongshu-cli (xhs)..."
+  uv tool install xiaohongshu-cli
+  ok "xhs installed"
+fi
+info "Xiaohongshu needs a one-time login: 'xhs login' (browser cookies) or 'xhs login --qrcode'."
+
 # ── uv-managed tools (auto-install on first use) ─────────────────────────────
 
 echo ""
@@ -78,4 +91,4 @@ info "  Qwen3-ASR 1.7B 4bit     ~0.9 GB  (Chinese STT)"
 
 echo ""
 echo -e "${BOLD}Done.${RESET} Run this to verify:"
-echo "  uv --version && ffmpeg -version | head -1"
+echo "  uv --version && ffmpeg -version | head -1 && xhs status --yaml >/dev/null 2>&1; echo xhs:\$?"

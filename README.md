@@ -1,6 +1,6 @@
 # web-skill
 
-Zero-auth, on-device tools for Claude Code — video transcripts. No API keys required.
+On-device tools for Claude Code — video transcripts and Xiaohongshu (小红书). No API keys (video is keyless; Xiaohongshu needs a one-time browser login).
 
 ## Install
 
@@ -18,6 +18,7 @@ See [INSTALL.md](INSTALL.md) for full instructions (including the one-liner for 
 | Skill | What it does |
 |-------|-------------|
 | video-transcript | Transcribe YouTube / Bilibili / any video URL or local audio file |
+| xiaohongshu | Search / read / comment / post Xiaohongshu (小红书) notes via `xhs` |
 
 ## Requirements
 
@@ -31,6 +32,7 @@ skill/                  ← installed to ~/.claude/skills/web-skill/
   SKILL.md              ← router (auto-loaded by Claude Code)
   tools/
     video-transcript.md ← one .md per tool
+    xiaohongshu.md
     scripts/            ← shared scripts referenced by the tool docs
 scripts/
   install.sh            ← installs system deps + registers skill
