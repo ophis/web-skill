@@ -2,7 +2,7 @@
 import importlib.util
 from pathlib import Path
 
-SCRIPTS = Path(__file__).resolve().parent.parent / "skill/tools/scripts"
+SCRIPTS = Path(__file__).resolve().parent.parent / "web_skill/skill/scripts"
 
 
 def load(name):

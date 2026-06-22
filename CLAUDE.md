@@ -1,19 +1,23 @@
 # CLAUDE.md — web-skill repo rules
 
-## Sync rule
+## Structure
 
-`scripts/install.sh` and `INSTALL.md` must be kept in sync with the actual skill structure at all times:
+Doc = router, package = engine. The agent reads `web_skill/skill/` docs and runs
+the upstream CLIs; `web_skill/` (cli/probe/channels) installs deps, reports
+status (`doctor`), and registers the skill. Layout in README.md.
 
-- Adding a new tool under `skill/tools/`? Update the install.sh system-deps section if the tool needs new CLI tools, and update INSTALL.md's model-download list if it downloads new models on first use.
-- Removing a dependency? Remove it from install.sh and INSTALL.md.
-- Changing the `skill/` layout? Verify install.sh still copies correctly and INSTALL.md's verify step still works.
+## Adding a channel — keep these in sync
 
-Never leave install.sh or INSTALL.md stale after a structural change.
+A new tool means **all** of:
+- `web_skill/channels/<name>.py` (`Channel`: `brew_deps`, `uv_tools`, `status()`) + register in `channels/__init__.py`. This is what `web-skill install`/`doctor` read — no separate deps list to maintain.
+- `web_skill/skill/tools/<name>.md` (router doc) + a row in `web_skill/skill/SKILL.md`.
+- `INSTALL.md` only if a new first-run model download or manual step is introduced (the dep install itself is now declarative via the channel).
+- Reusable scripts go in `web_skill/skill/scripts/`; reference them in docs as `${CLAUDE_SKILL_DIR}/scripts/<x>.py`. `tools/` stays pure docs.
 
 ## Skill frontmatter rule
 
-`skill/SKILL.md` frontmatter (`description`, `allowed-tools`) must accurately reflect what tools are actually available. Update it whenever a tool is added, removed, or its trigger phrases change. Never leave it describing tools that don't exist yet.
+`web_skill/skill/SKILL.md` frontmatter (`description`, `allowed-tools`) must accurately reflect what tools are actually available. Update it whenever a tool is added, removed, or its trigger phrases change. Never leave it describing tools that don't exist yet.
 
 ## Tests rule
 
-One test file per script: `tests/test_<script>.py` for each `skill/tools/scripts/<script>.py` (e.g. `tests/test_transcript.py`). Editing one script only re-runs its file. Tests use pytest, declared via the file's PEP 723 inline deps so `uv run tests/test_<script>.py` runs just that file; the whole suite is `uv run --with pytest --with requests pytest tests/`. Each file imports the script via `tests/_common.py`'s `load()`. Scripts with no importable pure functions (e.g. `stt.py` — logic runs at import) get no test file.
+One test file per script: `tests/test_<script>.py` for each `web_skill/skill/scripts/<script>.py`. Editing one script only re-runs its file. Tests use pytest, declared via the file's PEP 723 inline deps so `uv run tests/test_<script>.py` runs just that file; the whole suite is `uv run --with pytest --with requests pytest tests/`. Each file imports the script via `tests/_common.py`'s `load()`. Scripts with no importable pure functions (e.g. `stt.py` — logic runs at import) get no test file.

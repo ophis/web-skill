@@ -4,54 +4,50 @@
 
 ### Goal
 
-Install web-skill and its dependencies so the user has video transcription
-available in Claude Code. After installation, the skill is registered at
-`~/.claude/skills/web-skill/` and ready to use.
+Install web-skill so the user has its on-device tools (video transcripts,
+Xiaohongshu, …) available in Claude Code. web-skill is a Python package: it
+installs the upstream CLIs, registers the skill, and reports status — it is the
+installer/router, the agent drives the upstream tools directly.
 
 ### ⚠️ Boundaries
 
 - **DO NOT** use `sudo` unless the user explicitly approves
-- **DO NOT** modify files outside `~/.web-skill/` (source clone) and `~/.claude/skills/web-skill/` (installed copy)
+- **DO NOT** modify files outside `~/.claude/skills/web-skill/` and the uv tool dirs
 - **DO NOT** create files in the current working directory / user's project
 
-### Step 1: Clone the repo
-
-Clone to a **source** location — NOT into the skills dir. `install.sh` copies
-`skill/` from here into `~/.claude/skills/web-skill/`.
+### Step 1: Install the package (provides the `web-skill` CLI)
 
 ```bash
-git clone https://github.com/ophis/web-skill.git ~/.web-skill
+uv tool install git+https://github.com/ophis/web-skill.git
 ```
 
-If already cloned, pull latest:
+Upgrade later with `uv tool upgrade web-skill`.
+
+### Step 2: Install tool dependencies
 
 ```bash
-git -C ~/.web-skill pull --ff-only
+web-skill install
 ```
 
-### Step 2: Install system dependencies
+Installs (idempotent): Homebrew formulae (`ffmpeg`), `uv`, and per-channel CLIs
+(`xiaohongshu-cli`). macOS / Apple Silicon only (MLX needs Metal).
 
-```bash
-bash ~/.web-skill/scripts/install.sh
-```
-
-This installs: `uv`, `ffmpeg`, and the `xhs` CLI (`xiaohongshu-cli`).
-
-First-run model downloads happen automatically when each tool is first used:
+First-run model downloads happen automatically on first use:
 - Whisper large-v3-turbo ~1.6 GB (English STT)
 - Qwen3-ASR 1.7B 4bit ~0.9 GB (Chinese STT)
 
-Xiaohongshu needs a one-time browser login before use: `xhs login` (auto-extract
-browser cookies) or `xhs login --qrcode` — the user must do this themselves.
-
-### Step 3: Verify
+### Step 3: Register the skill
 
 ```bash
-uv --version && ffmpeg -version | head -1 && command -v xhs
-ls ~/.claude/skills/web-skill/SKILL.md
+web-skill skill --install      # copies the bundled skill into ~/.claude/skills/web-skill
 ```
 
-### Step 4: Report to user
+### Step 4: Verify + report
 
-Tell the user which steps succeeded and which (if any) need manual action
-(e.g. first-run model downloads, or `xhs login` for Xiaohongshu).
+```bash
+web-skill doctor               # per-channel install/auth status
+```
+
+Tell the user what's green and what needs manual action — e.g. Xiaohongshu shows
+`not logged in` until they run `xhs login --cookie-source chrome`, and STT models
+download on first transcription.
