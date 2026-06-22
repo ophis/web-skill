@@ -30,7 +30,9 @@ web-skill install
 ```
 
 Installs (idempotent): Homebrew formulae (`ffmpeg`), `uv`, and per-channel CLIs
-(`xiaohongshu-cli`). macOS / Apple Silicon only (MLX needs Metal).
+(`xiaohongshu-cli`, `rdt-cli`). macOS / Apple Silicon only (MLX needs Metal).
+Add `--with-opencli` to also install the shared OpenCLI fallback (npm + a manual
+Chrome-extension step; desktop only).
 
 First-run model downloads happen automatically on first use:
 - Whisper large-v3-turbo ~1.6 GB (English STT)
@@ -49,5 +51,6 @@ web-skill doctor               # per-channel install/auth status
 ```
 
 Tell the user what's green and what needs manual action — e.g. Xiaohongshu shows
-`not logged in` until they run `xhs login --cookie-source chrome`, and STT models
-download on first transcription.
+`not logged in` until they run `xhs login --cookie-source chrome`, Reddit until
+`rdt login` (and needs a proxy in mainland China), and STT models download on
+first transcription.

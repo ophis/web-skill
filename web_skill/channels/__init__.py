@@ -3,12 +3,14 @@
 from typing import List
 
 from .base import Channel
+from .reddit import RedditChannel
 from .video_transcript import VideoTranscriptChannel
 from .xiaohongshu import XiaoHongShuChannel
 
 ALL_CHANNELS: List[Channel] = [
     VideoTranscriptChannel(),
     XiaoHongShuChannel(),
+    RedditChannel(),
 ]
 
 
