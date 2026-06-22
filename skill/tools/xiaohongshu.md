@@ -9,12 +9,16 @@ Output is YAML on a non-TTY (or pass `--json`). Payloads live under `.data`.
 ```
 xhs status --yaml >/dev/null && echo AUTH_OK || echo AUTH_NEEDED
 ```
-If `AUTH_NEEDED`: the user must be logged into xiaohongshu.com in any browser, then
+If `AUTH_NEEDED`: the user logs into xiaohongshu.com in a browser, then extract its cookies:
 ```
-xhs login            # auto-extract cookies from the browser (Chrome/Arc/Edge/Firefox/Safari/...)
-xhs login --qrcode   # fallback: scan the terminal QR with the Xiaohongshu app
+xhs login                          # auto-detect a logged-in browser
+xhs login --cookie-source chrome   # name it explicitly (arc/edge/firefox/safari/brave/...)
 ```
-Verify with `xhs whoami`. Cookies expire → re-run `xhs login`.
+macOS may prompt to allow Keychain access to "Chrome Safe Storage" — approve it.
+Verify with `xhs whoami`; cookies last ~7 days, re-run to refresh.
+
+Avoid `xhs login --qrcode` unless cookie extraction is impossible — it downloads a
+~600 MB Camoufox browser on first use and has been unreliable.
 
 ## Read
 ```
