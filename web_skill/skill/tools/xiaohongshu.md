@@ -21,6 +21,9 @@ Avoid `xhs login --qrcode` unless cookie extraction is impossible — it downloa
 ~600 MB Camoufox browser on first use and has been unreliable.
 
 ## Read
+**Search in Chinese.** XHS is a Chinese platform — query with Chinese keywords
+(e.g. `美食`, not `food`); English terms return little or nothing. Translate the
+user's intent to Chinese before searching.
 ```
 xhs search <keyword>            # --sort popular  --type video
 xhs read <id|url|index>         # note content
