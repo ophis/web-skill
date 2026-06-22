@@ -27,11 +27,13 @@ See [INSTALL.md](INSTALL.md) for full instructions (including the one-liner for 
 ## Repo layout
 
 ```
-skill/          ← installed to ~/.claude/skills/web-skill/
-  SKILL.md      ← router (auto-loaded by Claude Code)
-  references/
-    video-transcript/
+skill/                  ← installed to ~/.claude/skills/web-skill/
+  SKILL.md              ← router (auto-loaded by Claude Code)
+  tools/
+    video-transcript.md ← one .md per tool
+    scripts/            ← shared scripts referenced by the tool docs
 scripts/
-  install.sh    ← installs system deps + registers skill
-INSTALL.md      ← instructions for AI agents
+  install.sh            ← installs system deps + registers skill
+tests/                  ← one test_<script>.py per script
+INSTALL.md              ← instructions for AI agents
 ```

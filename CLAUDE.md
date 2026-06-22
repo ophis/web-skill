@@ -16,4 +16,4 @@ Never leave install.sh or INSTALL.md stale after a structural change.
 
 ## Tests rule
 
-One test file per tool: `tests/test_<tool>.py` (e.g. `tests/test_video_transcript.py`). Adding a tool adds its own file — don't fold tests into an existing tool's file, so editing one tool only re-runs that tool's tests. Each file is `uv run`-able standalone and uses plain asserts (no framework).
+One test file per script: `tests/test_<script>.py` for each `skill/tools/scripts/<script>.py` (e.g. `tests/test_transcript.py`). Editing one script only re-runs its file. Tests use pytest, declared via the file's PEP 723 inline deps so `uv run tests/test_<script>.py` runs just that file; the whole suite is `uv run --with pytest --with requests pytest tests/`. Each file imports the script via `tests/_common.py`'s `load()`. Scripts with no importable pure functions (e.g. `stt.py` — logic runs at import) get no test file.
