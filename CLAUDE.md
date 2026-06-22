@@ -9,3 +9,7 @@
 - Changing the `skill/` layout? Verify install.sh still copies correctly and INSTALL.md's verify step still works.
 
 Never leave install.sh or INSTALL.md stale after a structural change.
+
+## Skill frontmatter rule
+
+`skill/SKILL.md` frontmatter (`description`, `allowed-tools`) must accurately reflect what tools are actually available. Update it whenever a tool is added, removed, or its trigger phrases change. Never leave it describing tools that don't exist yet.
