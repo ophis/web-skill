@@ -1,5 +1,5 @@
 # /// script
-# requires-python = ">=3.9"
+# requires-python = ">=3.10"
 # dependencies = ["mlx-whisper", "mlx-audio>=0.4.4"]
 # ///
 """Transcribe an audio file on Apple Silicon GPU.
