@@ -1,14 +1,13 @@
 ---
 name: web-skill
 description: >
-  MUST USE for: video transcripts (YouTube, Bilibili, any video URL or audio
-  file); Xiaohongshu (小红书) note search / read / comments; Reddit posts /
-  comments / subreddit search; Twitter / X tweets / timelines / search.
-  Triggers: 视频/transcript/字幕/总结视频/STT/语音转文字/小红书/xiaohongshu/xhs/redbook/
-  reddit/subreddit/redd.it/twitter/tweet/x.com/推特.
-  On-device; video tools are keyless. Social tools (Xiaohongshu / Reddit /
-  Twitter) are read-only and need a one-time browser login; Reddit also needs a
-  proxy in mainland China.
+  MUST USE for: video transcript / STT — YouTube, Bilibili, any video URL or audio file
+  (视频/字幕/总结视频/语音转文字); Xiaohongshu note search/read/comments (小红书/xhs/redbook);
+  Reddit posts/comments/subreddit search (redd.it); Twitter/X tweets/timelines/search (推特/x.com);
+  recommending videos to watch — which videos to watch next from your personalized
+  YouTube/Bilibili home recommendations (推荐视频/看什么视频/有什么好看的/首页推荐).
+  Video tools are keyless; social + recommendation tools are read-only and need a one-time
+  browser login (Reddit also needs a mainland-China proxy). On-device.
 allowed-tools: Bash
 ---
 
@@ -24,6 +23,7 @@ On-device tools. Read the relevant tool doc before running any commands.
 | Xiaohongshu (小红书) search / read / comments (read-only) | [tools/xiaohongshu.md](tools/xiaohongshu.md) |
 | Reddit posts / comments / subreddit / search (read-only) | [tools/reddit.md](tools/reddit.md) |
 | Twitter / X tweets / timelines / search (read-only) | [tools/twitter.md](tools/twitter.md) |
+| Recommend videos to watch — personalized YouTube / Bilibili home video recommendations (read-only) | [tools/recommend.md](tools/recommend.md) |
 | **Any other site** with no row above (zhihu, weibo, bilibili, douban, v2ex, arxiv, github, taobao…) | run `opencli <site>` directly — [tools/opencli.md](tools/opencli.md) |
 
 Backends install via `web-skill install`; check status with `web-skill doctor`.
