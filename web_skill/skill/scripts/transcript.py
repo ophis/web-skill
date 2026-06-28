@@ -34,6 +34,16 @@ def youtube_id(s):
     return m.group(1) if m else None
 
 
+def _yt_meta_lang(url):
+    """The video's declared audio language from yt-dlp metadata (e.g. 'zh-Hant'), or None."""
+    r = subprocess.run(
+        ["uvx", "--with", "curl_cffi", "yt-dlp", "--impersonate", "chrome",
+         "--skip-download", "--print", "%(language)s", url],
+        capture_output=True, text=True)
+    out = (r.stdout.strip().splitlines() or [""])[-1].strip()
+    return out if out and out.lower() not in ("na", "none") else None
+
+
 def from_youtube(url, lang):
     vid = youtube_id(url)
     if not vid:
@@ -41,10 +51,27 @@ def from_youtube(url, lang):
     from youtube_transcript_api import YouTubeTranscriptApi
 
     api = YouTubeTranscriptApi()
+    # Prioritise the actual AUDIO language (from metadata) over a creator-supplied translated
+    # caption — a zh-audio video subtitled only in English must not be returned as English.
+    audio_lang = _yt_meta_lang(url)
+    if audio_lang:
+        base = audio_lang.split("-")[0].lower()
+        try:
+            tracks = list(api.list(vid))
+        except Exception:
+            tracks = []
+        match = [t for t in tracks if t.language_code.split("-")[0].lower() == base]
+        if match:
+            t = sorted(match, key=lambda t: t.is_generated)[0]  # manual over auto-generated
+            return " ".join(s.text for s in t.fetch())
+        if tracks:  # captions exist but none in the audio language → they are translations
+            sys.exit(f"only translated captions {[t.language_code for t in tracks]} for "
+                     f"{audio_lang}-audio {vid} -- fall back to stt.py")
+    # unknown audio language (metadata/list unavailable): old best-effort behaviour
     try:
         fetched = api.fetch(vid, languages=[lang, "en"])
     except Exception:
-        fetched = next(iter(api.list(vid))).fetch()  # fall back to any available language
+        fetched = next(iter(api.list(vid))).fetch()  # any available language
     return " ".join(s.text for s in fetched)
 
 
