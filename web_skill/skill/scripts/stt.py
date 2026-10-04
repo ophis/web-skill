@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["mlx-whisper", "mlx-audio>=0.4.4"]
+# dependencies = ["mlx-whisper", "mlx-audio>=0.4.4", "transformers<5.13"]  # 5.13.0 breaks tokenizer registration
 # ///
 """Transcribe an audio file on Apple Silicon GPU.
 
