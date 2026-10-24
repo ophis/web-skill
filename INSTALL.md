@@ -1,57 +1,60 @@
 # web-skill — Installation Guide
 
-## For AI Agents
-
-### Goal
-
-Install web-skill so the user has its on-device tools (video transcripts,
-Xiaohongshu, …) available in Claude Code. web-skill is a Python package: it
-installs the upstream CLIs, registers the skill, and reports status — it is the
-installer/router, the agent drives the upstream tools directly.
-
-### ⚠️ Boundaries
-
-- **DO NOT** use `sudo` unless the user explicitly approves
-- **DO NOT** modify files outside `~/.claude/skills/web-skill/` and the uv tool dirs
-- **DO NOT** create files in the current working directory / user's project
-
-### Step 1: Install the package (provides the `web-skill` CLI)
+## Install
 
 ```bash
 uv tool install git+https://github.com/ophis/web-skill.git
-```
-
-Upgrade later with `uv tool upgrade web-skill`.
-
-### Step 2: Install tool dependencies
-
-```bash
 web-skill install
+web-skill skill --install
+web-skill doctor
 ```
 
-Installs (idempotent): Homebrew formulae (`ffmpeg`), `uv`, and per-channel CLIs
-(`xiaohongshu-cli`, `rdt-cli`, `twitter-cli`). macOS / Apple Silicon only (MLX needs Metal).
-Add `--with-opencli` to also install the shared OpenCLI fallback (npm + a manual
-Chrome-extension step; desktop only).
+`install` retains video dependencies (`uv`, `ffmpeg`) on macOS / Apple Silicon.
+Browser scripts declare Python dependencies inline for `uv run`; they install no
+global browser tooling and never download a browser. Install Google Chrome
+manually if absent. STT model downloads still happen on first transcription:
+Whisper large-v3-turbo ~1.6 GB; Qwen3-ASR 1.7B 4bit ~0.9 GB.
 
-First-run model downloads happen automatically on first use:
-- Whisper large-v3-turbo ~1.6 GB (English STT)
-- Qwen3-ASR 1.7B 4bit ~0.9 GB (Chinese STT)
+## First login
 
-### Step 3: Register the skill
+Run only for sites the user needs:
 
 ```bash
-web-skill skill --install      # copies the bundled skill into ~/.claude/skills/web-skill
+web-skill login https://www.reddit.com/
+web-skill login https://x.com/
+web-skill login https://www.xiaohongshu.com/
+web-skill login https://www.bilibili.com/
+web-skill login https://www.youtube.com/
 ```
 
-### Step 4: Verify + report
+The user completes login in the visible web-skill window, then presses Enter in
+the terminal to close it. Do not automate login or account interactions. An
+expired session requires the same command again. Mainland-China Reddit access
+may require the user's proxy.
+
+Profile location, permissions, persistence and read-only behavior are documented
+in [tools/web.md](web_skill/skill/tools/web.md). Agents may write only the skill
+install locations, uv tool directories, and web-skill's owned state when invoking
+its browser commands; do not use sudo or write into the user's project.
+
+## Rebuild after source edits
 
 ```bash
-web-skill doctor               # per-channel install/auth status
+uv tool install . --force
+web-skill skill --install
 ```
 
-Tell the user what's green and what needs manual action — e.g. Xiaohongshu shows
-`not logged in` until they run `xhs login --cookie-source chrome`, Reddit until
-`rdt login` (and needs a proxy in mainland China), Twitter until they're logged
-into x.com in a browser (it auto-extracts cookies), and STT models download on
-first transcription.
+The installed CLI copies the skill from its installed wheel. Alternatively,
+`uv run web-skill skill --install` copies freshly built source. For a released
+update, force-install the Git URL above, then re-register the skill.
+
+## Verify
+
+```bash
+web-skill read https://example.com --links
+web-skill doctor
+```
+
+Doctor performs offline availability checks only. A recorded manual login is not
+proof of a valid remote session. It never launches the browser or an upstream
+social authentication probe.

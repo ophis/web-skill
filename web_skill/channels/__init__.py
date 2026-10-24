@@ -7,12 +7,14 @@ from .reddit import RedditChannel
 from .twitter import TwitterChannel
 from .video_transcript import VideoTranscriptChannel
 from .xiaohongshu import XiaoHongShuChannel
+from .web import WebChannel
 
 ALL_CHANNELS: List[Channel] = [
     VideoTranscriptChannel(),
     XiaoHongShuChannel(),
     RedditChannel(),
     TwitterChannel(),
+    WebChannel(),
 ]
 
 
