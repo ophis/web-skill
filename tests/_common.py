@@ -1,8 +1,10 @@
 """Shared loader: import a script from skill/tools/scripts/ by name (no package)."""
 import importlib.util
+import sys
 from pathlib import Path
 
 SCRIPTS = Path(__file__).resolve().parent.parent / "web_skill/skill/scripts"
+sys.path.insert(0, str(SCRIPTS))
 
 
 def load(name):
