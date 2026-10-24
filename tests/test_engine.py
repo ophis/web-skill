@@ -59,6 +59,22 @@ def test_probe_timeout_kills_group_and_reaps(monkeypatch):
     assert events == [("communicate", 1), (12345, signal.SIGKILL), ("communicate", None)]
 
 
+def test_probe_interrupt_kills_group_and_reaps(monkeypatch):
+    events = []
+    class Process:
+        pid = 12345
+        def communicate(self, timeout=None):
+            events.append(timeout)
+            if timeout is not None:
+                raise KeyboardInterrupt()
+            return ("", "")
+    monkeypatch.setattr(subprocess, "Popen", lambda *a, **kw: Process())
+    monkeypatch.setattr(os, "killpg", lambda pid, sig: events.append((pid, sig)))
+    with pytest.raises(KeyboardInterrupt):
+        probe._run_once("/fake", [], 1, "fake")
+    assert events == [1, (12345, signal.SIGKILL), None]
+
+
 @pytest.mark.parametrize("code,status", [(0, "ok"), (127, "broken"), (1, "error")])
 def test_probe_classification(monkeypatch, code, status):
     process = SimpleNamespace(returncode=code, communicate=lambda **kw: ("out", "err"))

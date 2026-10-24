@@ -45,6 +45,28 @@ def test_profile_rejects_symlink(tmp_path):
     assert list(outside.iterdir()) == []
 
 
+def test_explicit_data_dir_stays_outside_home(monkeypatch, tmp_path):
+    data = tmp_path / "temporary-state"
+    monkeypatch.setenv("WEB_SKILL_DATA", str(data))
+    profile = b.profile_dir()
+    assert profile == data / "chrome-profile"
+    b.record_login("https://x.com/")
+    assert b.login_status("x.com")
+    assert (data / "logins.json").exists()
+    assert not (tmp_path / ".local").exists()
+
+
+def test_explicit_data_dir_rejects_symlink(monkeypatch, tmp_path):
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    link = tmp_path / "linked-state"
+    link.symlink_to(outside, target_is_directory=True)
+    monkeypatch.setenv("WEB_SKILL_DATA", str(link))
+    with pytest.raises(RuntimeError, match="symlink"):
+        b.profile_dir()
+    assert list(outside.iterdir()) == []
+
+
 @pytest.mark.parametrize("method,url,allowed", [
     ("GET", "https://example.com/", True), ("HEAD", "http://example.com/", True),
     ("POST", "https://example.com/action", False), ("GET", "file:///private", False),

@@ -25,8 +25,11 @@ def validate_url(url):
 
 
 def _state_root():
-    root = Path.home() / ".local" / "share" / "web-skill"
-    for path in (root.parent.parent, root.parent, root, root / "chrome-profile",
+    override = os.environ.get("WEB_SKILL_DATA")
+    root = Path(override) if override else Path.home() / ".local" / "share" / "web-skill"
+    if not root.is_absolute():
+        raise ValueError("WEB_SKILL_DATA must be an absolute path")
+    for path in (*root.parents, root, root / "chrome-profile",
                  root / "chrome-profile" / "Default", root / "logins.json"):
         if path.is_symlink():
             raise RuntimeError(f"refusing symlink in web-skill state: {path}")
