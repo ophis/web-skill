@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """web-skill CLI — install (deps), doctor (status), skill (register)."""
 import argparse
+import importlib.resources as ir
 import subprocess
 import sys
 
@@ -21,25 +22,8 @@ def _brew(formula):
         subprocess.run(["brew", "install", formula], check=True)
 
 
-def _uv_tool(pkg, cmd):
-    if probe_command(cmd).status == "missing":
-        print(f"uv tool install {pkg}")
-        subprocess.run(["uv", "tool", "install", pkg], check=True)
-
-
-def _install_opencli():
-    """Shared fallback backend — heavy + partly manual (npm + Chrome extension + daemon)."""
-    if probe_command("node").status == "missing":
-        _brew("node")
-    if probe_command("opencli").status == "missing":
-        print("npm install -g @jackwener/opencli")
-        subprocess.run(["npm", "install", "-g", "@jackwener/opencli"], check=True)
-    print("OpenCLI installed. MANUAL step: install its Chrome extension + keep Chrome\n"
-          "open + log into the target sites. See tools/opencli.md.")
-
-
-def install(with_opencli=False):
-    """Install upstream backends. Concrete per channel (mirrors Agent-Reach's install funcs)."""
+def install():
+    """Install existing video dependencies; browser Python deps stay in uv scripts."""
     if sys.platform != "darwin":
         print("macOS / Apple Silicon only (MLX needs Metal).", file=sys.stderr)
         return 1
@@ -48,31 +32,51 @@ def install(with_opencli=False):
         return 1
     _brew("uv")
     _brew("ffmpeg")                      # video-transcript
-    _uv_tool("xiaohongshu-cli", "xhs")   # xiaohongshu
-    _uv_tool("rdt-cli", "rdt")           # reddit (primary)
-    _uv_tool("twitter-cli", "twitter")   # twitter (primary)
-    if with_opencli:                     # shared fallback for reddit/xiaohongshu/…
-        _install_opencli()
+    print("Web reads use installed Google Chrome; Python dependencies are resolved by uv run.")
     print("\nDone. Next: web-skill skill --install   (then: web-skill doctor)")
     return 0
 
 
-def main():
+def _page(args):
+    resource = ir.files("web_skill") / "skill" / "scripts" / "page.py"
+    try:
+        with ir.as_file(resource) as script:
+            return subprocess.run(["uv", "run", str(script), *args]).returncode
+    except OSError as error:
+        print(f"cannot run page script: {error}", file=sys.stderr)
+        return 1
+
+
+def main(argv=None):
     p = argparse.ArgumentParser(prog="web-skill", description=__doc__)
     sub = p.add_subparsers(dest="command")
-    p_install = sub.add_parser("install", help="Install system deps + per-channel backends")
-    p_install.add_argument("--with-opencli", action="store_true",
-                           help="Also install OpenCLI (shared fallback; npm + manual Chrome extension)")
+    sub.add_parser("install", help="Install existing video dependencies")
     sub.add_parser("doctor", help="Check each channel's backend availability")
     ps = sub.add_parser("skill", help="Register/unregister the skill in ~/.claude/skills")
     g = ps.add_mutually_exclusive_group(required=True)
     g.add_argument("--install", action="store_true")
     g.add_argument("--uninstall", action="store_true")
     sub.add_parser("version", help="Show version")
+    read = sub.add_parser("read", help="Read a page with isolated headless Chrome")
+    read.add_argument("url")
+    read.add_argument("--selector")
+    read.add_argument("--links", action="store_true")
+    read.add_argument("--wait", type=float, default=0)
+    login = sub.add_parser("login", help="Manually log in using a visible web-skill browser")
+    login.add_argument("url")
 
-    args = p.parse_args()
+    args = p.parse_args(argv)
     if args.command == "install":
-        return install(args.with_opencli)
+        return install()
+    if args.command == "login":
+        return _page(["--login", args.url])
+    if args.command == "read":
+        options = [args.url, "--wait", str(args.wait)]
+        if args.selector is not None:
+            options += ["--selector", args.selector]
+        if args.links:
+            options.append("--links")
+        return _page(options)
     if args.command == "doctor":
         return doctor()
     if args.command == "skill":

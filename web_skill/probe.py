@@ -11,6 +11,7 @@ Channels use probe_command() inside check() so doctor reports real health.
 """
 import os
 import shutil
+import signal
 import subprocess
 from dataclasses import dataclass
 from typing import Optional, Sequence
@@ -57,15 +58,26 @@ def probe_command(cmd, args=("--version",), timeout=10, retries=0, package=None)
 
 def _run_once(path: str, args: Sequence[str], timeout: int, package: str) -> ProbeResult:
     try:
-        r = subprocess.run([path, *args], capture_output=True, encoding="utf-8",
-                           errors="replace", timeout=timeout, env=_utf8_env())
+        process = subprocess.Popen([path, *args], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                   encoding="utf-8", errors="replace", env=_utf8_env(),
+                                   start_new_session=True)
     except OSError:
         return ProbeResult("broken", hint=reinstall_hint(package))
-    except subprocess.TimeoutExpired:
+    try:
+        stdout, stderr = process.communicate(timeout=timeout)
+    except (subprocess.TimeoutExpired, KeyboardInterrupt) as error:
+        # Grandchildren can inherit pipes and keep a credential prompt alive.
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        process.communicate()
+        if isinstance(error, KeyboardInterrupt):
+            raise
         return ProbeResult("timeout", hint=f"`{path}` timed out (>{timeout}s)")
-    if r.returncode in _BROKEN_EXIT_CODES:
+    if process.returncode in _BROKEN_EXIT_CODES:
         return ProbeResult("broken", hint=reinstall_hint(package))
-    output = ((r.stdout or "") + (r.stderr or "")).strip()
-    if r.returncode != 0:
+    output = ((stdout or "") + (stderr or "")).strip()
+    if process.returncode != 0:
         return ProbeResult("error", output=output)
     return ProbeResult("ok", output=output)
