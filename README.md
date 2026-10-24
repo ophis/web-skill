@@ -1,65 +1,89 @@
 # web-skill
 
-On-device tools for Claude Code — video transcripts and Xiaohongshu (小红书).
-Packaged as a Python CLI that installs deps, registers the skill, and reports
-status. The **agent is the router**: it reads the skill docs and drives the
-upstream CLIs directly.
+On-device tools for Claude Code: video transcripts, social page reads, and
+personalized video recommendations. The agent reads the bundled tool docs and
+uses standalone `uv run` scripts; the Python CLI installs video dependencies,
+registers the skill and reports offline availability.
 
-## Install
+## Install and rebuild
 
 ```bash
 uv tool install git+https://github.com/ophis/web-skill.git
-web-skill install            # ffmpeg, uv, per-channel CLIs (macOS / Apple Silicon)
-web-skill skill --install    # register into ~/.claude/skills/web-skill
-web-skill doctor             # check status
+web-skill install
+web-skill skill --install
+web-skill doctor
 ```
 
-See [INSTALL.md](INSTALL.md) for the AI-agent install flow.
+After changing this checkout, rebuild the CLI **before** copying its bundled skill:
 
-## What's included
-
-| Tool | What it does |
-|------|-------------|
-| video-transcript | Transcribe YouTube / Bilibili / any video URL or local audio file (keyless) |
-| xiaohongshu | Search / read / browse 小红书 notes + comments via `xhs` (read-only; one-time browser login) |
-| reddit | Search / read posts, comments, subreddits, users via `rdt` (read-only; browser login; proxy in CN). OpenCLI fallback. |
-| twitter | Search / read tweets, timelines, threads, profiles via `twitter` (read-only; browser login). OpenCLI fallback. |
-
-OpenCLI (`@jackwener/opencli`) is a shared opt-in fallback backend reused across
-social channels — install with `web-skill install --with-opencli`.
-
-## Architecture (doc = router, package = engine)
-
-```
-web_skill/                    ← Python package (the engine; framework ported from Agent-Reach)
-  cli.py                      ← web-skill install | doctor | skill --install
-  probe.py                    ← probe_command() — installed vs broken vs not-logged-in
-  doctor.py                   ← check_all() / format_report()
-  channels/                   ← one Channel per platform
-    base.py                   ← Channel ABC: backends (ordered), check(), active_backend
-    video_transcript.py  xiaohongshu.py
-  skill/                      ← bundled, copied to ~/.claude/skills/web-skill/
-    SKILL.md                  ← router (auto-loaded by Claude Code)
-    tools/                    ← pure router docs, one .md per tool
-      video-transcript.md  xiaohongshu.md
-    scripts/                  ← standalone uv-run scripts (PEP 723 inline deps)
-      transcript.py  stt.py  bilibili.py
-pyproject.toml                ← packaging + `web-skill` entry point
-tests/                        ← one test_<script>.py per script
+```bash
+uv tool install . --force
+web-skill skill --install
 ```
 
-A `Channel` lists its `backends` in priority order; `check()` probes them with
-`probe_command()` and sets `active_backend` to the first usable one (the
-deterministic backend selection lives in code, not in the agent). The agent
-reads the skill docs and runs the active backend's native CLI directly.
+For an installed release, refresh both with:
 
-## Adding a channel
+```bash
+uv tool install git+https://github.com/ophis/web-skill.git --force
+web-skill skill --install
+```
 
-1. `web_skill/channels/<name>.py` — a `Channel` subclass: `name`, `description`, `backends` (ordered), `tier`, `can_handle()`, `check()` (probe each backend, set `active_backend`); register it in `channels/__init__.py`.
-2. Add its install line(s) to `install()` in `web_skill/cli.py`.
-3. `web_skill/skill/tools/<name>.md` — the router doc; add a row to `skill/SKILL.md`.
-4. Reusable scripts (if any) go in `web_skill/skill/scripts/`; add `tests/test_<script>.py`.
+See [INSTALL.md](INSTALL.md) for first-run setup.
+
+## Tools
+
+| Tool | Behavior |
+| --- | --- |
+| video-transcript | YouTube / Bilibili / video URL / local audio transcription |
+| xiaohongshu | Read visible notes, search pages and comments using independent Chrome |
+| reddit | Read visible posts, comments, subreddits and search pages |
+| twitter | Read visible X tweets, timelines and search pages |
+| recommend | YouTube / Bilibili personalized video candidates from independent login |
+| web | Read an http(s) page: title, final URL, text; optional CSS selector and links |
+
+```bash
+web-skill read https://example.com --links
+web-skill login https://x.com/
+```
+
+Only the user logs in, manually, in the visible window. Browser reads use installed
+Google Chrome through Playwright, with no browser download or new global Python
+dependency. See [web.md](web_skill/skill/tools/web.md) for profile ownership,
+read-only limits and all options. Social output is limited to rendered content;
+blocked requests or login walls can prevent a site from rendering fully.
+
+`doctor` starts no browser and runs no social authentication command. Its login
+records are local user confirmations, **not verified sessions**; they may be stale.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  A[Agent] --> B[Skill tool docs]
+  B --> C[uv run scripts]
+  C --> D[Owned Chrome profile]
+  E[CLI doctor] --> F[Offline channel checks]
+  E --> G[Local login records]
+```
+
+| Location | Responsibility |
+| --- | --- |
+| `web_skill/cli.py` | install, doctor, skill, read, login |
+| `web_skill/channels/` | platform routing and backend availability |
+| `web_skill/probe.py` | process-group-bounded command probes |
+| `web_skill/skill/tools/` | agent routing docs |
+| `web_skill/skill/scripts/` | standalone scripts with inline dependencies |
+| `tests/` | fake-only unit tests |
+
+## Development
+
+Follow [CLAUDE.md](CLAUDE.md). Full unit suite:
+
+```bash
+uv run --with pytest --with requests pytest tests/
+```
 
 ## Requirements
 
-macOS, Apple Silicon (MLX needs Metal GPU), Homebrew.
+macOS / Apple Silicon for MLX transcription; Homebrew for existing video tools.
+Web reads require `uv` and an installed Google Chrome.

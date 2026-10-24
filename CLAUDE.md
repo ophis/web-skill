@@ -2,12 +2,12 @@
 
 ## Structure
 
-Doc = router, package = engine — framework ported from Agent-Reach (don't reinvent it). The agent reads `web_skill/skill/` docs and runs the upstream CLIs; `web_skill/` is the engine: `probe.py` (`probe_command`), `channels/` (`Channel.check()` + ordered `backends` + `active_backend`), `doctor.py` (`check_all`/`format_report`), `cli.py` (install/doctor/skill). The deterministic "which backend is usable" decision lives in `check()`, not in the agent. Layout in README.md.
+Doc = router, package = engine — framework ported from Agent-Reach (don't reinvent it). The agent reads `web_skill/skill/` docs and runs uv scripts; `web_skill/` is the engine: `probe.py` (`probe_command`), `channels/` (`Channel.check()` + ordered `backends` + `active_backend`), `doctor.py` (`check_all`/`format_report`), `cli.py` (install/doctor/skill/read/login). Backend availability lives in `check()`, not in the agent. Browser availability and login records are checked offline; never execute upstream social authentication probes. Layout in README.md.
 
 ## Adding a channel — keep these in sync
 
 A new tool means **all** of:
-- `web_skill/channels/<name>.py` — `Channel` subclass: `name`, `description`, `backends` (ordered, `backends[0]` preferred), `tier`, `can_handle()`, `check()` (probe each candidate via `probe_command`, set `active_backend`, return first ok→warn). Register in `channels/__init__.py`. Multi-backend (e.g. primary CLI + OpenCLI fallback) = list both + an `_check_<backend>` each; copy the pattern in `xiaohongshu.py`.
+- `web_skill/channels/<name>.py` — `Channel` subclass: `name`, `description`, `backends`, `tier`, `can_handle()`, `check()`; register in `channels/__init__.py`. Browser channels extend `WebChannel` and declare a `login_url`; availability checks must remain offline.
 - Install line(s) in `install()` in `web_skill/cli.py`.
 - `web_skill/skill/tools/<name>.md` (router doc) + a row in `web_skill/skill/SKILL.md`.
 - `INSTALL.md` only if a new first-run model download or manual step is introduced.

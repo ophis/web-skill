@@ -43,4 +43,4 @@ uvx yt-dlp --print title --print description --print duration_string "<url>"   #
   unquoted link fails with `no matches found`.
 - YouTube blocks datacenter IPs; running on a local/residential IP is most reliable.
 - DRM streaming (Netflix / Spotify / Disney+ …) cannot be downloaded.
-- Login-gated sites: add `--cookies-from-browser chrome` to the yt-dlp commands.
+- Login-gated media is unsupported by these keyless transcription scripts. For visible page text, use [web.md](web.md) with the independent login profile.
