@@ -1,29 +1,34 @@
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["browser-cookie3", "requests"]
+# dependencies = ["playwright>=1.48,<2", "requests"]
 # ///
 """Personalized recommendation candidates (Bilibili + YouTube) -> JSONL on stdout.
 
 Read-only, no storage: recommendations are ephemeral, so fetch fresh each call. One candidate
 per line: {platform, video_id, title, creator, creator_id, url, duration_sec, views, reason}.
 
-Cookies are read live from the browser (--browser, default chrome):
+Sessions come only from web-skill's independent Chrome profile:
   Bilibili - web rcmd API, needs the SESSDATA cookie.
   YouTube  - InnerTube `what_to_watch` feed, SAPISIDHASH-signed with the SAPISID cookie.
 A separate consumer ranks these candidates against the user's tastes; this script only fetches.
 """
 import argparse, hashlib, json, re, sys, time
 
+import browser
+
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/120.0 Safari/537.36")
 
 
-def cookiejar(browser, domain):
-    import browser_cookie3
-    fn = getattr(browser_cookie3, browser, None)
-    if fn is None:
-        raise RuntimeError(f"unsupported browser '{browser}'")
-    return fn(domain_name=domain)
+def profile_cookies(origin):
+    """Use only our own profile, preserving cookie domain/path/secure restrictions."""
+    import requests
+    jar = requests.cookies.RequestsCookieJar()
+    with browser.browser_context() as context:
+        for cookie in context.cookies([origin]):
+            jar.set(cookie["name"], cookie["value"], domain=cookie["domain"],
+                    path=cookie["path"], secure=cookie["secure"])
+    return jar
 
 
 # ---------- parsing (pure) ----------
@@ -68,15 +73,14 @@ def norm_bili_rcmd(it):
     }
 
 
-def bili_candidates(browser, limit):
+def bili_candidates(limit):
     import requests
-    jar = cookiejar(browser, "bilibili.com")
+    jar = profile_cookies("https://www.bilibili.com/")
     if not any(c.name == "SESSDATA" for c in jar):
-        raise RuntimeError("no SESSDATA — log in at bilibili.com in the browser")
+        raise RuntimeError("no SESSDATA — run web-skill login https://www.bilibili.com/")
     s = requests.Session()
     s.headers.update({"User-Agent": UA, "Referer": "https://www.bilibili.com/"})
-    for c in jar:
-        s.cookies.set(c.name, c.value)
+    s.cookies.update(jar)
     out, idx = [], 1
     while len(out) < limit and idx <= 8:   # rcmd returns ~10/page; page via fresh_idx
         d = s.get("https://api.bilibili.com/x/web-interface/index/top/rcmd",
@@ -162,12 +166,13 @@ def _continuation(data):
     return None
 
 
-def youtube_candidates(browser, limit):
+def youtube_candidates(limit):
     import requests
-    ck = {c.name: c.value for c in cookiejar(browser, "youtube.com")}
-    sapisid = ck.get("SAPISID") or ck.get("__Secure-3PAPISID")
+    ck = profile_cookies("https://www.youtube.com/")
+    values = {cookie.name: cookie.value for cookie in ck}
+    sapisid = values.get("SAPISID") or values.get("__Secure-3PAPISID")
     if not sapisid:
-        raise RuntimeError("no SAPISID cookie — log in at youtube.com in the browser")
+        raise RuntimeError("no SAPISID — run web-skill login https://www.youtube.com/")
     origin, ts = "https://www.youtube.com", int(time.time())
     headers = {"Authorization": f"SAPISIDHASH {ts}_{sapisidhash(sapisid, origin, ts)}",
                "Origin": origin, "X-Origin": origin, "Content-Type": "application/json", "User-Agent": UA}
@@ -199,23 +204,24 @@ def youtube_candidates(browser, limit):
 FETCHERS = {"bilibili": bili_candidates, "youtube": youtube_candidates}
 
 
-def main():
+def main(argv=None):
     ap = argparse.ArgumentParser(description="Fetch recommendation candidates as JSONL (no storage).")
     ap.add_argument("--platform", choices=["bilibili", "youtube", "both"], default="both")
     ap.add_argument("--limit", type=int, default=20, help="candidates per platform")
-    ap.add_argument("--browser", default="chrome", help="browser to read cookies from")
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
+    if args.limit < 1:
+        ap.error("limit must be positive")
     platforms = ["bilibili", "youtube"] if args.platform == "both" else [args.platform]
     failed = 0
     for p in platforms:
         try:
-            for rec in FETCHERS[p](args.browser, args.limit):
+            for rec in FETCHERS[p](args.limit):
                 print(json.dumps(rec, ensure_ascii=False))
         except Exception as e:
             failed += 1
             print(f"{p}: ERROR {e}", file=sys.stderr)
-    sys.exit(1 if failed == len(platforms) else 0)   # fail only if every platform failed
+    return 1 if failed == len(platforms) else 0   # fail only if every platform failed
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

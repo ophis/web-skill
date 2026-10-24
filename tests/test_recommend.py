@@ -1,14 +1,16 @@
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["pytest"]
+# dependencies = ["pytest", "requests"]
 # ///
 """Tests for skill/scripts/recommend.py (pure logic: parsers + normalizers).
 
 Run one file:  uv run tests/test_recommend.py
 Whole suite:   uv run --with pytest --with requests pytest tests/
-Network paths (rcmd / InnerTube fetch) need a live login — out of scope.
+Network and profile paths use fakes; no live logins or browser access.
 """
 import sys
+from contextlib import contextmanager
+from types import SimpleNamespace
 
 import pytest
 
@@ -77,6 +79,63 @@ def test_sapisidhash_deterministic():
     a = r.sapisidhash("SECRET", "https://www.youtube.com", 1)
     assert a == r.sapisidhash("SECRET", "https://www.youtube.com", 1)
     assert len(a) == 40 and all(c in "0123456789abcdef" for c in a)
+
+
+def test_profile_cookies_scoped_and_closed(monkeypatch):
+    events = []
+    @contextmanager
+    def context():
+        def cookies(urls):
+            assert urls == ["https://www.bilibili.com/"]
+            return [{"name": "SESSDATA", "value": "fake-secret", "domain": ".bilibili.com",
+                     "path": "/", "secure": True}]
+        try:
+            yield SimpleNamespace(cookies=cookies)
+        finally:
+            events.append("closed")
+    monkeypatch.setattr(r.browser, "browser_context", context)
+    jar = r.profile_cookies("https://www.bilibili.com/")
+    cookie = next(iter(jar))
+    assert (cookie.name, cookie.domain, cookie.path, cookie.secure) == ("SESSDATA", ".bilibili.com", "/", True)
+    assert events == ["closed"]
+
+
+def test_missing_login_does_not_call_network(monkeypatch):
+    import requests
+    monkeypatch.setattr(r, "profile_cookies", lambda url: requests.cookies.RequestsCookieJar())
+    monkeypatch.setattr(requests, "Session", lambda: pytest.fail("network attempted"))
+    with pytest.raises(RuntimeError, match="web-skill login"):
+        r.bili_candidates(2)
+    with pytest.raises(RuntimeError, match="web-skill login"):
+        r.youtube_candidates(2)
+
+
+def test_youtube_pagination_and_deduplication(monkeypatch):
+    import requests
+    jar = requests.cookies.RequestsCookieJar()
+    jar.set("SAPISID", "fake", domain=".youtube.com", path="/", secure=True)
+    monkeypatch.setattr(r, "profile_cookies", lambda url: jar)
+    calls = []
+    def post(url, **kw):
+        calls.append(kw)
+        assert kw["cookies"] is jar
+        return SimpleNamespace(json=lambda: {"items": [{"videoRenderer": {"videoId": "same"}},
+            {"continuationItemRenderer": {"continuationEndpoint": {"continuationCommand": {"token": "next"}}}}]}
+            if len(calls) == 1 else {"items": [{"videoRenderer": {"videoId": "same"}}, {"videoRenderer": {"videoId": "new"}}]})
+    monkeypatch.setattr(requests, "post", post)
+    assert [item["video_id"] for item in r.youtube_candidates(3)] == ["same", "new"]
+    assert calls[1]["json"]["continuation"] == "next"
+
+
+def test_partial_failure_jsonl_and_exit(monkeypatch, capsys):
+    monkeypatch.setitem(r.FETCHERS, "bilibili", lambda n: [{"video_id": "fake"}])
+    def fail(n):
+        raise RuntimeError("fake failure")
+    monkeypatch.setitem(r.FETCHERS, "youtube", fail)
+    assert r.main([]) == 0
+    captured = capsys.readouterr()
+    assert '"video_id": "fake"' in captured.out and "fake failure" in captured.err
+    assert r.main(["--platform", "youtube"]) == 1
 
 
 if __name__ == "__main__":
