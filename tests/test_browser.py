@@ -119,7 +119,7 @@ def test_pipe_launch_guards_and_cleanup(monkeypatch, failure):
     assert opts["channel"] == "chrome" and opts["headless"]
     assert opts["user_data_dir"] == str(b.profile_dir())
     assert opts["accept_downloads"] is False and opts["service_workers"] == "block"
-    assert "--remote-debugging-pipe" in opts["args"]
+    assert not any("remote-debugging" in arg for arg in opts["args"])
     assert "--use-mock-keychain" in opts["args"] and "--password-store=basic" in opts["args"]
     assert not any("remote-debugging-port" in arg for arg in opts["args"])
     assert calls["ws_closed"] and calls["closed"] and calls["stopped"]

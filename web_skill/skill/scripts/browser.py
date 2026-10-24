@@ -113,7 +113,7 @@ def browser_context(headless=True):
         context = playwright.chromium.launch_persistent_context(
             user_data_dir=str(profile), channel="chrome", executable_path=str(executable),
             headless=headless, accept_downloads=False, service_workers="block",
-            args=["--remote-debugging-pipe", "--password-store=basic", "--use-mock-keychain",
+            args=["--password-store=basic", "--use-mock-keychain",
                   "--disable-extensions", "--disable-background-networking", "--disable-sync"],
         )
         try:
