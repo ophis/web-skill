@@ -31,11 +31,13 @@ Only this explicit login mode opens a visible window. The user logs in manually,
 then presses Enter in the terminal. Login mode permits the user's authentication
 requests; agents must not click, type or submit in that window.
 
-The fixed profile is `~/.local/share/web-skill/chrome-profile`, outside every
-installed skill copy. Skill install/uninstall does not remove it. No profile path
-override or import from daily browsing is supported. Chrome's system password
-integration is disabled. The state directory has mode 0700; local login records
-have mode 0600. Treat the profile as private credentials, do not share or commit it.
+The default profile is `~/.local/share/web-skill/chrome-profile`, outside every
+installed skill copy. Skill install/uninstall does not remove it. For isolated
+tests, `WEB_SKILL_DATA=/absolute/temporary/path` sets the state directory;
+the browser profile is its `chrome-profile` child. No import from daily browsing
+is supported. Chrome's system password integration is disabled. The state
+directory has mode 0700; local login records have mode 0600. Treat the profile
+as private credentials, do not share or commit it.
 
 Use one web-skill browser invocation at a time. If the profile is busy, close the
 other web-skill window before retrying. Do not delete lock files from a running
